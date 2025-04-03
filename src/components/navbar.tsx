@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
-
+import { Menu, User, X, UserPlus } from "lucide-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
@@ -56,12 +56,23 @@ export default function Navbar() {
           {/* Auth buttons */}
           <div className="hidden md:block">
             <div className="flex items-center space-x-2">
-              <Link href="/sign-in">
-                <Button variant="outline">Sign In</Button>
-              </Link>
-              <Link href="/sign-up">
-                <Button className="bg-red-800 hover:bg-red-700">Sign Up</Button>
-              </Link>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+              <SignedOut>
+                <Button variant="outline" asChild>
+                  <Link href="/sign-in">
+                    Sign In
+                    <User className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button className="bg-red-800 hover:bg-red-700" asChild>
+                  <Link href="/sign-up">
+                    Sign Up
+                    <UserPlus className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </SignedOut>
             </div>
           </div>
 
