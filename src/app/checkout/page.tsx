@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCartStore } from "@/store/cartStore";
 
 interface CartItem {
   monumentId: number;
@@ -32,22 +33,11 @@ interface CartItem {
 }
 
 export default function CheckoutPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [totalPrice, setTotalPrice] = useState(0);
-
-  useEffect(() => {
-    const savedCart = localStorage.getItem("cartItems");
-    if (savedCart) {
-      const items = JSON.parse(savedCart);
-      setCartItems(items);
-      setTotalPrice(
-        items.reduce(
-          (sum: number, item: CartItem) => sum + item.price * item.quantity,
-          0
-        )
-      );
-    }
-  }, []);
+  const cartItems = useCartStore((state) => state.cartItems);
+  const totalPrice = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
@@ -142,8 +132,8 @@ export default function CheckoutPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col space-y-2">
-                <Button className="w-full bg-red-800 hover:bg-red-700">
-                  Complete Payment
+                <Button className="w-full bg-red-800 hover:bg-red-700" asChild>
+                  <Link href={"/verify-otp"}>Complete Payment</Link>
                 </Button>
                 <Link
                   href="/"

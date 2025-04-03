@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { useCartStore } from "@/store/cartStore";
 
 // Sample data for Bhutan's dzongkhags and monuments
 const dzongkhags = [
@@ -56,17 +57,16 @@ interface CartItem {
 export default function TicketBookingForm() {
   const [selectedDzongkhag, setSelectedDzongkhag] = useState<string>("");
   const [selectedMonument, setSelectedMonument] = useState<string>("");
-  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("cartItems");
-      return saved ? JSON.parse(saved) : [];
-    }
-    return [];
-  });
   const [ticketQuantity, setTicketQuantity] = useState(1);
+  const cartItems = useCartStore((state) => state.cartItems);
+  const addToCartStore = useCartStore((state) => state.addToCart);
+  const removeFromCartStore = useCartStore((state) => state.removeFromCart);
+  const updateQuantityStore = useCartStore((state) => state.updateQuantity);
 
   useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    }
   }, [cartItems]);
 
   // Filter monuments based on selected dzongkhag
@@ -86,47 +86,26 @@ export default function TicketBookingForm() {
     );
     if (!monument) return;
 
-    // Check if item already exists in cart
-    const existingItemIndex = cartItems.findIndex(
-      (item) => item.monumentId === monument.id
-    );
+    addToCartStore({
+      monumentId: monument.id,
+      monumentName: monument.name,
+      price: monument.price,
+      quantity: ticketQuantity,
+    });
 
-    if (existingItemIndex >= 0) {
-      // Update existing item
-      const updatedCart = [...cartItems];
-      updatedCart[existingItemIndex].quantity += ticketQuantity;
-      setCartItems(updatedCart);
-    } else {
-      // Add new item
-      setCartItems([
-        ...cartItems,
-        {
-          monumentId: monument.id,
-          monumentName: monument.name,
-          price: monument.price,
-          quantity: ticketQuantity,
-        },
-      ]);
-    }
-
-    // Reset selections
     setSelectedMonument("");
     setTicketQuantity(1);
   };
 
   // Handle removing items from cart
   const removeFromCart = (monumentId: number) => {
-    setCartItems(cartItems.filter((item) => item.monumentId !== monumentId));
+    removeFromCartStore(monumentId);
   };
 
   // Handle updating quantity in cart
   const updateQuantity = (monumentId: number, newQuantity: number) => {
     if (newQuantity < 1) return;
-
-    const updatedCart = cartItems.map((item) =>
-      item.monumentId === monumentId ? { ...item, quantity: newQuantity } : item
-    );
-    setCartItems(updatedCart);
+    updateQuantityStore(monumentId, newQuantity);
   };
 
   // Calculate total price
