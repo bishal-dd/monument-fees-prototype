@@ -1,10 +1,16 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { MinusCircle, PlusCircle, ShoppingCart } from "lucide-react"
+import { useEffect, useState } from "react";
+import { MinusCircle, PlusCircle, ShoppingCart } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -13,8 +19,9 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 
 // Sample data for Bhutan's dzongkhags and monuments
 const dzongkhags = [
@@ -23,7 +30,7 @@ const dzongkhags = [
   { id: 3, name: "Punakha" },
   { id: 4, name: "Wangdue Phodrang" },
   { id: 5, name: "Bumthang" },
-]
+];
 
 const monuments = [
   { id: 1, dzongkhagId: 1, name: "Tashichho Dzong", price: 500 },
@@ -37,41 +44,58 @@ const monuments = [
   { id: 9, dzongkhagId: 4, name: "Wangdue Phodrang Dzong", price: 400 },
   { id: 10, dzongkhagId: 5, name: "Kurje Lhakhang", price: 300 },
   { id: 11, dzongkhagId: 5, name: "Jambay Lhakhang", price: 300 },
-]
+];
 
 interface CartItem {
-  monumentId: number
-  monumentName: string
-  price: number
-  quantity: number
+  monumentId: number;
+  monumentName: string;
+  price: number;
+  quantity: number;
 }
 
 export default function TicketBookingForm() {
-  const [selectedDzongkhag, setSelectedDzongkhag] = useState<string>("")
-  const [selectedMonument, setSelectedMonument] = useState<string>("")
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [ticketQuantity, setTicketQuantity] = useState(1)
+  const [selectedDzongkhag, setSelectedDzongkhag] = useState<string>("");
+  const [selectedMonument, setSelectedMonument] = useState<string>("");
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("cartItems");
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+  const [ticketQuantity, setTicketQuantity] = useState(1);
+
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
 
   // Filter monuments based on selected dzongkhag
   const filteredMonuments = selectedDzongkhag
-    ? monuments.filter((monument) => monument.dzongkhagId === Number.parseInt(selectedDzongkhag))
-    : []
+    ? monuments.filter(
+        (monument) =>
+          monument.dzongkhagId === Number.parseInt(selectedDzongkhag)
+      )
+    : [];
 
   // Handle adding tickets to cart
   const addToCart = () => {
-    if (!selectedMonument) return
+    if (!selectedMonument) return;
 
-    const monument = monuments.find((m) => m.id === Number.parseInt(selectedMonument))
-    if (!monument) return
+    const monument = monuments.find(
+      (m) => m.id === Number.parseInt(selectedMonument)
+    );
+    if (!monument) return;
 
     // Check if item already exists in cart
-    const existingItemIndex = cartItems.findIndex((item) => item.monumentId === monument.id)
+    const existingItemIndex = cartItems.findIndex(
+      (item) => item.monumentId === monument.id
+    );
 
     if (existingItemIndex >= 0) {
       // Update existing item
-      const updatedCart = [...cartItems]
-      updatedCart[existingItemIndex].quantity += ticketQuantity
-      setCartItems(updatedCart)
+      const updatedCart = [...cartItems];
+      updatedCart[existingItemIndex].quantity += ticketQuantity;
+      setCartItems(updatedCart);
     } else {
       // Add new item
       setCartItems([
@@ -82,31 +106,34 @@ export default function TicketBookingForm() {
           price: monument.price,
           quantity: ticketQuantity,
         },
-      ])
+      ]);
     }
 
     // Reset selections
-    setSelectedMonument("")
-    setTicketQuantity(1)
-  }
+    setSelectedMonument("");
+    setTicketQuantity(1);
+  };
 
   // Handle removing items from cart
   const removeFromCart = (monumentId: number) => {
-    setCartItems(cartItems.filter((item) => item.monumentId !== monumentId))
-  }
+    setCartItems(cartItems.filter((item) => item.monumentId !== monumentId));
+  };
 
   // Handle updating quantity in cart
   const updateQuantity = (monumentId: number, newQuantity: number) => {
-    if (newQuantity < 1) return
+    if (newQuantity < 1) return;
 
     const updatedCart = cartItems.map((item) =>
-      item.monumentId === monumentId ? { ...item, quantity: newQuantity } : item,
-    )
-    setCartItems(updatedCart)
-  }
+      item.monumentId === monumentId ? { ...item, quantity: newQuantity } : item
+    );
+    setCartItems(updatedCart);
+  };
 
   // Calculate total price
-  const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
 
   return (
     <div className="grid gap-8 md:grid-cols-3">
@@ -123,8 +150,8 @@ export default function TicketBookingForm() {
               <Select
                 value={selectedDzongkhag}
                 onValueChange={(value) => {
-                  setSelectedDzongkhag(value)
-                  setSelectedMonument("")
+                  setSelectedDzongkhag(value);
+                  setSelectedMonument("");
                 }}
               >
                 <SelectTrigger id="dzongkhag" className="w-full">
@@ -134,7 +161,10 @@ export default function TicketBookingForm() {
                   <SelectGroup>
                     <SelectLabel>Dzongkhags</SelectLabel>
                     {dzongkhags.map((dzongkhag) => (
-                      <SelectItem key={dzongkhag.id} value={dzongkhag.id.toString()}>
+                      <SelectItem
+                        key={dzongkhag.id}
+                        value={dzongkhag.id.toString()}
+                      >
                         {dzongkhag.name}
                       </SelectItem>
                     ))}
@@ -147,15 +177,28 @@ export default function TicketBookingForm() {
               <label htmlFor="monument" className="text-sm font-medium">
                 Select Monument
               </label>
-              <Select value={selectedMonument} onValueChange={setSelectedMonument} disabled={!selectedDzongkhag}>
+              <Select
+                value={selectedMonument}
+                onValueChange={setSelectedMonument}
+                disabled={!selectedDzongkhag}
+              >
                 <SelectTrigger id="monument" className="w-full">
-                  <SelectValue placeholder={selectedDzongkhag ? "Select a monument" : "First select a dzongkhag"} />
+                  <SelectValue
+                    placeholder={
+                      selectedDzongkhag
+                        ? "Select a monument"
+                        : "First select a dzongkhag"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Monuments</SelectLabel>
                     {filteredMonuments.map((monument) => (
-                      <SelectItem key={monument.id} value={monument.id.toString()}>
+                      <SelectItem
+                        key={monument.id}
+                        value={monument.id.toString()}
+                      >
                         {monument.name} - Nu. {monument.price}
                       </SelectItem>
                     ))}
@@ -172,19 +215,29 @@ export default function TicketBookingForm() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setTicketQuantity(Math.max(1, ticketQuantity - 1))}
+                  onClick={() =>
+                    setTicketQuantity(Math.max(1, ticketQuantity - 1))
+                  }
                   disabled={ticketQuantity <= 1}
                 >
                   <MinusCircle className="h-4 w-4" />
                 </Button>
                 <span className="w-8 text-center">{ticketQuantity}</span>
-                <Button variant="outline" size="icon" onClick={() => setTicketQuantity(ticketQuantity + 1)}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setTicketQuantity(ticketQuantity + 1)}
+                >
                   <PlusCircle className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
-            <Button onClick={addToCart} disabled={!selectedMonument} className="mt-4 bg-red-800 hover:bg-red-700">
+            <Button
+              onClick={addToCart}
+              disabled={!selectedMonument}
+              className="mt-4 bg-red-800 hover:bg-red-700"
+            >
               Add to Cart
             </Button>
           </CardContent>
@@ -216,7 +269,9 @@ export default function TicketBookingForm() {
                           variant="outline"
                           size="icon"
                           className="h-6 w-6"
-                          onClick={() => updateQuantity(item.monumentId, item.quantity - 1)}
+                          onClick={() =>
+                            updateQuantity(item.monumentId, item.quantity - 1)
+                          }
                         >
                           <MinusCircle className="h-3 w-3" />
                         </Button>
@@ -225,7 +280,9 @@ export default function TicketBookingForm() {
                           variant="outline"
                           size="icon"
                           className="h-6 w-6"
-                          onClick={() => updateQuantity(item.monumentId, item.quantity + 1)}
+                          onClick={() =>
+                            updateQuantity(item.monumentId, item.quantity + 1)
+                          }
                         >
                           <PlusCircle className="h-3 w-3" />
                         </Button>
@@ -254,14 +311,13 @@ export default function TicketBookingForm() {
             <Button
               className="w-full bg-red-800 hover:bg-red-700"
               disabled={cartItems.length === 0}
-              onClick={() => alert("Proceeding to checkout...")}
+              asChild
             >
-              Checkout
+              <Link href={"/checkout"}>Checkout</Link>
             </Button>
           </CardFooter>
         </Card>
       </div>
     </div>
-  )
+  );
 }
-
