@@ -33,12 +33,6 @@ export default function Navbar() {
                 Home
               </Link>
               <Link
-                href="/monuments"
-                className="rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-800"
-              >
-                Monuments
-              </Link>
-              <Link
                 href="/about"
                 className="rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-800"
               >
