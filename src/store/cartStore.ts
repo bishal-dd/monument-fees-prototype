@@ -1,17 +1,22 @@
+// stores/cartStore.ts
 import { create } from "zustand";
 
 interface CartItem {
   monumentId: number;
   monumentName: string;
   price: number;
-  quantity: number;
+  adultQuantity: number;
+  kidQuantity: number;
+  adultTotal: number;
+  kidTotal: number;
 }
 
 interface CartState {
   cartItems: CartItem[];
   addToCart: (item: CartItem) => void;
   removeFromCart: (monumentId: number) => void;
-  updateQuantity: (monumentId: number, quantity: number) => void;
+  updateAdultQuantity: (monumentId: number, quantity: number) => void;
+  updateKidQuantity: (monumentId: number, quantity: number) => void;
   clearCart: () => void;
 }
 
@@ -19,19 +24,28 @@ export const useCartStore = create<CartState>((set) => ({
   cartItems: [],
   addToCart: (newItem) =>
     set((state) => {
-      const existingItem = state.cartItems.find(
+      const index = state.cartItems.findIndex(
         (item) => item.monumentId === newItem.monumentId
       );
-      if (existingItem) {
-        return {
-          cartItems: state.cartItems.map((item) =>
-            item.monumentId === newItem.monumentId
-              ? { ...item, quantity: item.quantity + newItem.quantity }
-              : item
-          ),
+      if (index >= 0) {
+        const existing = state.cartItems[index];
+        const updated = {
+          ...existing,
+          adultQuantity: existing.adultQuantity + newItem.adultQuantity,
+          kidQuantity: existing.kidQuantity + newItem.kidQuantity,
+          adultTotal: existing.adultTotal + newItem.adultTotal,
+          kidTotal: existing.kidTotal + newItem.kidTotal,
         };
+        return {
+          cartItems: [
+            ...state.cartItems.slice(0, index),
+            updated,
+            ...state.cartItems.slice(index + 1),
+          ],
+        };
+      } else {
+        return { cartItems: [...state.cartItems, newItem] };
       }
-      return { cartItems: [...state.cartItems, newItem] };
     }),
   removeFromCart: (monumentId) =>
     set((state) => ({
@@ -39,11 +53,25 @@ export const useCartStore = create<CartState>((set) => ({
         (item) => item.monumentId !== monumentId
       ),
     })),
-  updateQuantity: (monumentId, quantity) =>
+  updateAdultQuantity: (monumentId, quantity) =>
     set((state) => ({
-      cartItems: state.cartItems.map((item) =>
-        item.monumentId === monumentId ? { ...item, quantity } : item
-      ),
+      cartItems: state.cartItems
+        .map((item) => {
+          if (item.monumentId !== monumentId) return item;
+          const adultTotal = quantity * item.price;
+          return { ...item, adultQuantity: quantity, adultTotal };
+        })
+        .filter((item) => item.adultQuantity + item.kidQuantity > 0),
+    })),
+  updateKidQuantity: (monumentId, quantity) =>
+    set((state) => ({
+      cartItems: state.cartItems
+        .map((item) => {
+          if (item.monumentId !== monumentId) return item;
+          const kidTotal = quantity * (item.price * 0.5);
+          return { ...item, kidQuantity: quantity, kidTotal };
+        })
+        .filter((item) => item.adultQuantity + item.kidQuantity > 0),
     })),
   clearCart: () => set({ cartItems: [] }),
 }));

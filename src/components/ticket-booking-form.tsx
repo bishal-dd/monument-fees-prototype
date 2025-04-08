@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MinusCircle, PlusCircle, ShoppingCart } from "lucide-react";
+import { useState } from "react";
+import {
+  MinusCircle,
+  PlusCircle,
+  ShoppingCart,
+  User,
+  Users,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +27,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
 
 // Sample data for Bhutan's dzongkhags and monuments
@@ -51,23 +58,26 @@ interface CartItem {
   monumentId: number;
   monumentName: string;
   price: number;
-  quantity: number;
+  adultQuantity: number;
+  kidQuantity: number;
+  adultTotal: number;
+  kidTotal: number;
 }
 
 export default function TicketBookingForm() {
+  const router = useRouter();
   const [selectedDzongkhag, setSelectedDzongkhag] = useState<string>("");
   const [selectedMonument, setSelectedMonument] = useState<string>("");
-  const [ticketQuantity, setTicketQuantity] = useState(1);
-  const cartItems = useCartStore((state) => state.cartItems);
-  const addToCartStore = useCartStore((state) => state.addToCart);
-  const removeFromCartStore = useCartStore((state) => state.removeFromCart);
-  const updateQuantityStore = useCartStore((state) => state.updateQuantity);
+  const [adultQuantity, setAdultQuantity] = useState(1);
+  const [kidQuantity, setKidQuantity] = useState(0);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("cartItems", JSON.stringify(cartItems));
-    }
-  }, [cartItems]);
+  const {
+    cartItems,
+    addToCart,
+    removeFromCart,
+    updateAdultQuantity,
+    updateKidQuantity,
+  } = useCartStore();
 
   // Filter monuments based on selected dzongkhag
   const filteredMonuments = selectedDzongkhag
@@ -77,42 +87,46 @@ export default function TicketBookingForm() {
       )
     : [];
 
-  // Handle adding tickets to cart
-  const addToCart = () => {
-    if (!selectedMonument) return;
+  const addToCartHandler = () => {
+    if (!selectedMonument || (adultQuantity === 0 && kidQuantity === 0)) return;
 
     const monument = monuments.find(
       (m) => m.id === Number.parseInt(selectedMonument)
     );
     if (!monument) return;
 
-    addToCartStore({
+    const newItem = {
       monumentId: monument.id,
       monumentName: monument.name,
       price: monument.price,
-      quantity: ticketQuantity,
-    });
+      adultQuantity,
+      kidQuantity,
+      adultTotal: adultQuantity * monument.price,
+      kidTotal: kidQuantity * (monument.price * 0.5),
+    };
 
+    addToCart(newItem); // Use store action
+
+    // Reset selections
     setSelectedMonument("");
-    setTicketQuantity(1);
-  };
-
-  // Handle removing items from cart
-  const removeFromCart = (monumentId: number) => {
-    removeFromCartStore(monumentId);
-  };
-
-  // Handle updating quantity in cart
-  const updateQuantity = (monumentId: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    updateQuantityStore(monumentId, newQuantity);
+    setAdultQuantity(1);
+    setKidQuantity(0);
   };
 
   // Calculate total price
   const totalPrice = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => total + item.adultTotal + item.kidTotal,
     0
   );
+
+  // Proceed to checkout
+  const proceedToCheckout = () => {
+    if (cartItems.length === 0) return;
+
+    // In a real app, you would store the cart in context, localStorage, or a state management solution
+    // For this demo, we'll just navigate to the checkout page
+    router.push("/checkout");
+  };
 
   return (
     <div className="grid gap-8 md:grid-cols-3">
@@ -186,35 +200,128 @@ export default function TicketBookingForm() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="quantity" className="text-sm font-medium">
-                Number of Tickets
-              </label>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() =>
-                    setTicketQuantity(Math.max(1, ticketQuantity - 1))
-                  }
-                  disabled={ticketQuantity <= 1}
-                >
-                  <MinusCircle className="h-4 w-4" />
-                </Button>
-                <span className="w-8 text-center">{ticketQuantity}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setTicketQuantity(ticketQuantity + 1)}
-                >
-                  <PlusCircle className="h-4 w-4" />
-                </Button>
+            {selectedMonument && (
+              <div className="rounded-md border border-gray-200 p-4 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-medium">Ticket Quantities</h3>
+                  {selectedMonument && (
+                    <div className="text-sm text-gray-500">
+                      Selected:{" "}
+                      {
+                        monuments.find(
+                          (m) => m.id === Number.parseInt(selectedMonument)
+                        )?.name
+                      }
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <User className="h-5 w-5 text-gray-600" />
+                      <div>
+                        <div className="font-medium">Adults</div>
+                        <div className="text-sm text-gray-500">
+                          Nu.{" "}
+                          {selectedMonument
+                            ? monuments.find(
+                                (m) =>
+                                  m.id === Number.parseInt(selectedMonument)
+                              )?.price
+                            : 0}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          setAdultQuantity(Math.max(0, adultQuantity - 1))
+                        }
+                        disabled={adultQuantity <= 0}
+                      >
+                        <MinusCircle className="h-4 w-4" />
+                      </Button>
+                      <span className="w-8 text-center">{adultQuantity}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setAdultQuantity(adultQuantity + 1)}
+                      >
+                        <PlusCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-gray-600" />
+                      <div>
+                        <div className="font-medium">Children</div>
+                        <div className="text-sm text-gray-500">
+                          Nu.{" "}
+                          {selectedMonument
+                            ? (monuments.find(
+                                (m) =>
+                                  m.id === Number.parseInt(selectedMonument)
+                              )?.price || 0) * 0.5
+                            : 0}
+                          <span className="ml-1 text-green-600">(50% off)</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          setKidQuantity(Math.max(0, kidQuantity - 1))
+                        }
+                        disabled={kidQuantity <= 0}
+                      >
+                        <MinusCircle className="h-4 w-4" />
+                      </Button>
+                      <span className="w-8 text-center">{kidQuantity}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setKidQuantity(kidQuantity + 1)}
+                      >
+                        <PlusCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedMonument && (adultQuantity > 0 || kidQuantity > 0) && (
+                  <div className="pt-2 border-t border-gray-200">
+                    <div className="flex justify-between text-sm">
+                      <span>Subtotal:</span>
+                      <span className="font-medium">
+                        Nu.{" "}
+                        {adultQuantity *
+                          (monuments.find(
+                            (m) => m.id === Number.parseInt(selectedMonument)
+                          )?.price || 0) +
+                          kidQuantity *
+                            ((monuments.find(
+                              (m) => m.id === Number.parseInt(selectedMonument)
+                            )?.price || 0) *
+                              0.5)}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
             <Button
-              onClick={addToCart}
-              disabled={!selectedMonument}
+              onClick={addToCartHandler}
+              disabled={
+                !selectedMonument || (adultQuantity === 0 && kidQuantity === 0)
+              }
               className="mt-4 bg-red-800 hover:bg-red-700"
             >
               Add to Cart
@@ -237,35 +344,105 @@ export default function TicketBookingForm() {
             ) : (
               <div className="space-y-4">
                 {cartItems.map((item) => (
-                  <div key={item.monumentId} className="space-y-2">
+                  <div key={item.monumentId} className="space-y-3">
                     <div className="flex justify-between">
                       <span className="font-medium">{item.monumentName}</span>
                       <span>Nu. {item.price}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() =>
-                            updateQuantity(item.monumentId, item.quantity - 1)
-                          }
-                        >
-                          <MinusCircle className="h-3 w-3" />
-                        </Button>
-                        <span className="w-6 text-center">{item.quantity}</span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() =>
-                            updateQuantity(item.monumentId, item.quantity + 1)
-                          }
-                        >
-                          <PlusCircle className="h-3 w-3" />
-                        </Button>
+
+                    {item.adultQuantity > 0 && (
+                      <div className="flex items-center justify-between pl-2">
+                        <div className="flex items-center gap-1.5">
+                          <User className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm">Adults</span>
+                          <Badge variant="outline" className="ml-1 text-xs">
+                            Nu. {item.price}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() =>
+                              updateAdultQuantity(
+                                item.monumentId,
+                                item.adultQuantity - 1
+                              )
+                            }
+                          >
+                            <MinusCircle className="h-3 w-3" />
+                          </Button>
+                          <span className="w-6 text-center">
+                            {item.adultQuantity}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() =>
+                              updateAdultQuantity(
+                                item.monumentId,
+                                item.adultQuantity + 1
+                              )
+                            }
+                          >
+                            <PlusCircle className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
+                    )}
+
+                    {item.kidQuantity > 0 && (
+                      <div className="flex items-center justify-between pl-2">
+                        <div className="flex items-center gap-1.5">
+                          <Users className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm">Children</span>
+                          <Badge variant="outline" className="ml-1 text-xs">
+                            Nu. {item.price * 0.5}
+                            <span className="ml-1 text-green-600">(-50%)</span>
+                          </Badge>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() =>
+                              updateKidQuantity(
+                                item.monumentId,
+                                item.kidQuantity - 1
+                              )
+                            }
+                          >
+                            <MinusCircle className="h-3 w-3" />
+                          </Button>
+                          <span className="w-6 text-center">
+                            {item.kidQuantity}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() =>
+                              updateKidQuantity(
+                                item.monumentId,
+                                item.kidQuantity + 1
+                              )
+                            }
+                          >
+                            <PlusCircle className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between text-sm pl-2">
+                      <span>Subtotal:</span>
+                      <span>Nu. {item.adultTotal + item.kidTotal}</span>
+                    </div>
+
+                    <div className="flex justify-end">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -275,6 +452,7 @@ export default function TicketBookingForm() {
                         Remove
                       </Button>
                     </div>
+
                     <Separator className="my-2" />
                   </div>
                 ))}
@@ -290,9 +468,9 @@ export default function TicketBookingForm() {
             <Button
               className="w-full bg-red-800 hover:bg-red-700"
               disabled={cartItems.length === 0}
-              asChild
+              onClick={proceedToCheckout}
             >
-              <Link href={"/checkout"}>Checkout</Link>
+              Checkout
             </Button>
           </CardFooter>
         </Card>

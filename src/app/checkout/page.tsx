@@ -35,7 +35,7 @@ interface CartItem {
 export default function CheckoutPage() {
   const cartItems = useCartStore((state) => state.cartItems);
   const totalPrice = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + item.price * (item.kidQuantity + item.adultQuantity),
     0
   );
 
@@ -70,7 +70,13 @@ export default function CheckoutPage() {
                             {item.monumentName}
                           </span>
                           <span>
-                            Nu. {item.price} × {item.quantity}
+                            <span>
+                              Adult: Nu. {item.price} × {item.adultQuantity}
+                            </span>
+                            <br />
+                            <span>
+                              Child: Nu. {item.price * 0.5} × {item.kidQuantity}
+                            </span>
                           </span>
                         </div>
                         <Separator />
