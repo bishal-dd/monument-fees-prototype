@@ -298,14 +298,28 @@ export default function StaffPage() {
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-sm">Security Hash:</span>
-                            <span className="text-sm font-medium">
-                              {ticketDetails.securityHash}
+                            <span className="text-sm">Purchase Date:</span>
+                            <span className="text-sm">
+                              {new Date(
+                                ticketDetails.purchaseDate
+                              ).toLocaleDateString()}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-sm">Purchase Date:</span>
+                            <span className="text-sm">Expiry Date:</span>
                             <span className="text-sm">
+                              {new Date(
+                                ticketDetails.purchaseDate
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm">Tour Duration:</span>
+                            <span className="text-sm">
+                              {new Date(
+                                ticketDetails.purchaseDate
+                              ).toLocaleDateString()}{" "}
+                              -{" "}
                               {new Date(
                                 ticketDetails.purchaseDate
                               ).toLocaleDateString()}

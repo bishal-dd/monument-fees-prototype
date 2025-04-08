@@ -110,7 +110,7 @@ export default function ReceiptPage() {
   // Fallback data if no booking data is available
   const fallbackData: BookingData = {
     bookingId,
-    customerName: "Tshering Dorji",
+    customerName: "Tour Agency",
     email: "t.dorji@example.com",
     purchaseDate: currentDate.toISOString(),
     tickets: [
@@ -173,13 +173,22 @@ export default function ReceiptPage() {
             </CardHeader>
 
             <CardContent className="space-y-6 p-6">
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-3">
                 <div>
                   <h3 className="font-semibold text-gray-700">
                     Customer Information
                   </h3>
                   <p className="text-sm">{displayData.customerName}</p>
                   <p className="text-sm">{displayData.email}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-700">Tour Duration</h3>
+                  <p className="text-sm">
+                    Start: {purchaseDate.toLocaleDateString()}
+                  </p>
+                  <p className="text-sm">
+                    End: {validUntilDate.toLocaleDateString()}
+                  </p>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-700">

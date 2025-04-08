@@ -24,6 +24,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCartStore } from "@/store/cartStore";
+import { CalendarIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { DateRange } from "react-day-picker";
 
 interface CartItem {
   monumentId: number;
@@ -38,6 +47,11 @@ export default function CheckoutPage() {
     (sum, item) => sum + item.price * (item.kidQuantity + item.adultQuantity),
     0
   );
+
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: undefined,
+    to: undefined,
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
@@ -104,6 +118,41 @@ export default function CheckoutPage() {
                 <div className="space-y-2">
                   <Label htmlFor="name">Tour Agency</Label>
                   <Input id="name" placeholder="Enter your Tour Agency" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Tour Duration</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {date?.from ? (
+                          date.to ? (
+                            <>
+                              {format(date.from, "LLL dd, y")} -{" "}
+                              {format(date.to, "LLL dd, y")}
+                            </>
+                          ) : (
+                            format(date.from, "LLL dd, y")
+                          )
+                        ) : (
+                          <span>Tour Duration</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={date?.from}
+                        selected={date}
+                        onSelect={setDate}
+                        numberOfMonths={2}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <div className="space-y-2">
