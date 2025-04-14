@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,13 +17,10 @@ import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCartStore } from "@/store/cartStore";
 import { CalendarIcon } from "lucide-react";
 import {
   Popover,
@@ -34,15 +31,27 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 
-interface CartItem {
-  monumentId: number;
-  monumentName: string;
-  price: number;
-  quantity: number;
-}
-
 export default function CheckoutPage() {
-  const cartItems = useCartStore((state) => state.cartItems);
+  const cartItems = [
+    {
+      monumentId: 1,
+      monumentName: "Tashichho Dzong",
+      price: 50,
+      kidQuantity: 2,
+      kidTotal: 100,
+      adultQuantity: 1,
+      adultTotal: 50,
+    },
+    {
+      monumentId: 2,
+      monumentName: "Buddha Dordenma",
+      price: 50,
+      kidQuantity: 2,
+      kidTotal: 100,
+      adultQuantity: 1,
+      adultTotal: 50,
+    },
+  ];
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * (item.kidQuantity + item.adultQuantity),
     0

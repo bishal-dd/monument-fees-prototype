@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, RefreshCw } from "lucide-react";
+import { Shield } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +22,6 @@ export default function VerifyOTPPage() {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const [isVerifying, setIsVerifying] = useState(false);
   const [timeLeft, setTimeLeft] = useState(420); // 3 minutes in seconds
-  const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState("");
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -102,23 +101,6 @@ export default function VerifyOTPPage() {
 
       // Redirect to receipt page with booking ID
       router.push(`/receipt?bookingId=${bookingId}`);
-    }, 1500);
-  };
-
-  // Handle OTP resend
-  const resendOtp = () => {
-    setIsResending(true);
-
-    // Simulate OTP resend (in a real app, this would be an API call)
-    setTimeout(() => {
-      setTimeLeft(180); // Reset timer
-      setIsResending(false);
-      setError("");
-
-      // Clear OTP fields
-      setOtp(Array(6).fill(""));
-      // Focus the first input
-      inputRefs.current[0]?.focus();
     }, 1500);
   };
 

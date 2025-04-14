@@ -10,7 +10,7 @@ export default function Home() {
             Bhutan Monument Tickets
           </h1>
           <p className="mt-2 text-gray-600">
-            Book tickets to visit Bhutan's beautiful monuments and dzongs
+            Book tickets to visit Bhutan&apos;s beautiful monuments and dzongs
           </p>
         </header>
         <main>

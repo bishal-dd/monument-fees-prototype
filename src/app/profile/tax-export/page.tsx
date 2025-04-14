@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Download,
@@ -166,8 +165,6 @@ const bookingsData = [
 ];
 
 export default function TaxExportPage() {
-  const router = useRouter();
-
   // Get available years from bookings data
   const availableYears = [
     ...new Set(

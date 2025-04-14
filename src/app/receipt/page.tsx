@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,9 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Printer, FileDown } from "lucide-react";
 import Link from "next/link";
-import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-// @ts-ignore
 import domtoimage from "dom-to-image";
 // Define booking data type
 interface Ticket {
@@ -58,24 +56,7 @@ export default function ReceiptPage() {
       }
     }
   }, []);
-
-  // Auto-download PDF on page load
-  useEffect(() => {
-    if (bookingData && !pdfDownloaded) {
-      // Add a slightly longer delay to ensure the receipt is fully rendered
-      const timer = setTimeout(() => {
-        handleDownloadPdf();
-      }, 2000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [bookingData, pdfDownloaded]);
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = useCallback(async () => {
     if (!receiptRef.current) return;
 
     setIsGeneratingPdf(true);
@@ -83,15 +64,13 @@ export default function ReceiptPage() {
     try {
       const receiptElement = receiptRef.current;
 
-      // Convert the receipt to an image
       const imgData = await domtoimage.toPng(receiptElement, {
         quality: 1,
         bgcolor: "#ffffff",
       });
 
-      // Define PDF dimensions
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210; // A4 width in mm
+      const imgWidth = 210;
       const imgHeight =
         (receiptElement.clientHeight * imgWidth) / receiptElement.clientWidth;
 
@@ -105,6 +84,22 @@ export default function ReceiptPage() {
     } finally {
       setIsGeneratingPdf(false);
     }
+  }, [receiptRef, bookingId]); // Only include necessary dependencies
+
+  // Auto-download PDF on page load
+  useEffect(() => {
+    if (bookingData && !pdfDownloaded) {
+      // Add a slightly longer delay to ensure the receipt is fully rendered
+      const timer = setTimeout(() => {
+        handleDownloadPdf();
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [handleDownloadPdf, bookingData, pdfDownloaded]);
+
+  const handlePrint = () => {
+    window.print();
   };
 
   // Fallback data if no booking data is available
@@ -135,9 +130,9 @@ export default function ReceiptPage() {
             {pdfDownloaded ? (
               <div className="mt-2 rounded-md bg-green-100 p-2 text-green-800">
                 <p>
-                  Your PDF ticket has been downloaded. If the download didn't
-                  start automatically, please click the "Download PDF" button
-                  below.
+                  Your PDF ticket has been downloaded. If the download
+                  didn&apos;t start automatically, please click the
+                  &quot;Download PDF&quot; button below.
                 </p>
               </div>
             ) : (

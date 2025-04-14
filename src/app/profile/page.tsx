@@ -9,9 +9,6 @@ import {
   FileDown,
   Calendar,
   Clock,
-  Filter,
-  ChevronDown,
-  Search,
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -29,13 +26,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -170,11 +160,7 @@ const bookingsData = [
 export default function ProfilePage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "amount">(
-    "newest"
-  );
 
   // Get available years from bookings data
   const availableYears = [
@@ -214,43 +200,14 @@ export default function ProfilePage() {
   };
 
   // Filter bookings based on active tab and search query
-  const filteredBookings = bookingsData
-    .filter((booking) => {
-      // Filter by tab
-      if (activeTab !== "all" && booking.status.toLowerCase() !== activeTab) {
-        return false;
-      }
+  const filteredBookings = bookingsData.filter((booking) => {
+    // Filter by tab
+    if (activeTab !== "all" && booking.status.toLowerCase() !== activeTab) {
+      return false;
+    }
 
-      // Filter by search query
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        return (
-          booking.bookingId.toLowerCase().includes(query) ||
-          booking.monuments.some((monument) =>
-            monument.toLowerCase().includes(query)
-          )
-        );
-      }
-
-      return true;
-    })
-    .sort((a, b) => {
-      // Sort based on selected order
-      if (sortOrder === "newest") {
-        return (
-          new Date(b.purchaseDate).getTime() -
-          new Date(a.purchaseDate).getTime()
-        );
-      } else if (sortOrder === "oldest") {
-        return (
-          new Date(a.purchaseDate).getTime() -
-          new Date(b.purchaseDate).getTime()
-        );
-      } else {
-        // Sort by amount
-        return b.totalAmount - a.totalAmount;
-      }
-    });
+    return true;
+  });
 
   const handleViewBooking = (booking: any) => {
     setSelectedBooking(booking);
@@ -379,19 +336,6 @@ export default function ProfilePage() {
                       <h3 className="mt-4 text-lg font-medium">
                         No bookings found
                       </h3>
-                      <p className="mt-1 text-sm text-gray-500">
-                        {searchQuery
-                          ? "Try adjusting your search criteria"
-                          : "You don't have any bookings in this category yet"}
-                      </p>
-                      {!searchQuery && (
-                        <Button
-                          className="mt-4 bg-red-800 hover:bg-red-700"
-                          asChild
-                        >
-                          <Link href="/">Book Tickets Now</Link>
-                        </Button>
-                      )}
                     </CardContent>
                   </Card>
                 ) : (
