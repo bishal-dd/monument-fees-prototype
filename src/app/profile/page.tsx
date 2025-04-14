@@ -301,9 +301,9 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full">
+                {/* <Button variant="outline" className="w-full">
                   Edit Profile
-                </Button>
+                </Button> */}
               </CardFooter>
             </Card>
           </div>
