@@ -51,6 +51,12 @@ export default function Navbar() {
           <div className="hidden md:block">
             <div className="flex items-center space-x-2">
               <SignedIn>
+                <Button className="bg-red-800 hover:bg-red-700" asChild>
+                  <Link href="/profile">
+                    Profile
+                    <User className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
                 <UserButton />
               </SignedIn>
               <SignedOut>
@@ -99,38 +105,28 @@ export default function Navbar() {
             >
               Home
             </Link>
-            <Link
-              href="/monuments"
-              className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:text-red-800"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Monuments
-            </Link>
-            <Link
-              href="/about"
-              className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:text-red-800"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              href="/contact"
-              className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:text-red-800"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
-            </Link>
             <div className="mt-4 flex flex-col space-y-2 px-3">
-              <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="outline" className="w-full justify-center">
-                  Sign In
+              <SignedIn>
+                <Button className="bg-red-800 hover:bg-red-700" asChild>
+                  <Link href="/profile">
+                    Profile
+                    <User className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
-              </Link>
-              <Link href="/sign-up" onClick={() => setIsMenuOpen(false)}>
-                <Button className="w-full justify-center bg-red-800 hover:bg-red-700">
-                  Sign Up
-                </Button>
-              </Link>
+                <UserButton />
+              </SignedIn>
+              <SignedOut>
+                <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="outline" className="w-full justify-center">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/sign-up" onClick={() => setIsMenuOpen(false)}>
+                  <Button className="w-full justify-center bg-red-800 hover:bg-red-700">
+                    Sign Up
+                  </Button>
+                </Link>
+              </SignedOut>
             </div>
           </div>
         </div>
