@@ -280,7 +280,7 @@ export default function ProfilePage() {
           <div className="space-y-6">
             <Card>
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow-md">
+                {/* <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow-md">
                   <Image
                     src="/placeholder.svg?height=96&width=96"
                     alt={userData.name}
@@ -288,7 +288,7 @@ export default function ProfilePage() {
                     height={96}
                     className="h-full w-full object-cover"
                   />
-                </div>
+                </div> */}
                 <CardTitle>{userData.name}</CardTitle>
                 <CardDescription>{userData.email}</CardDescription>
               </CardHeader>
