@@ -156,6 +156,13 @@ export default function StaffPage() {
   const markMonumentAsUsed = (ticketId: string) => {
     if (!ticketDetails) return;
 
+    // Confirm with the user if they are sure
+    const confirm = window.confirm(
+      "Are you sure you want to mark this monument as used?"
+    );
+
+    if (!confirm) return;
+
     // Create a deep copy of the ticket details
     const updatedTicketDetails = { ...ticketDetails };
 
