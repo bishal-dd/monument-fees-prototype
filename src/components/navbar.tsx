@@ -107,7 +107,11 @@ export default function Navbar() {
             </Link>
             <div className="mt-4 flex flex-col space-y-2 px-3">
               <SignedIn>
-                <Button className="bg-red-800 hover:bg-red-700" asChild>
+                <Button
+                  className="bg-red-800 hover:bg-red-700"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  asChild
+                >
                   <Link href="/profile">
                     Profile
                     <User className="ml-2 h-4 w-4" />
