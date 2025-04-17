@@ -7,7 +7,7 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-red-800 md:text-4xl">
-            Bhutan Monument Tickets
+            Bhutan Monument Booking
           </h1>
           <p className="mt-2 text-gray-600">
             Book tickets to visit Bhutan&apos;s beautiful monuments and dzongs
@@ -22,7 +22,8 @@ export default function Home() {
             reserved.
           </p>
           <p>
-            <Link href={"/staff"}>Staff Login</Link>
+            <Link href={"/staff"}>Staff Login</Link> |{" "}
+            <Link href={"/admin"}>Admin Login</Link>
           </p>
         </footer>
       </div>

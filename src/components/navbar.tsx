@@ -17,9 +17,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <div className="h-8 w-8 rounded-full bg-red-800"></div>
-              <span className="ml-2 text-xl font-bold text-red-800">
-                Bhutan Tickets
-              </span>
+              <span className="ml-2 text-xl font-bold text-red-800">BMB</span>
             </Link>
           </div>
 
